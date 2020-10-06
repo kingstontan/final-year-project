@@ -1,5 +1,5 @@
 import os
-import cv2
+import cv2 as cv
 import numpy as np
 from tqdm import tqdm
 
@@ -46,17 +46,17 @@ class dataClass():
             path = "data/line_images/%s/%s-%s/%s-%s-%s.png" % (
                 x.rootdir, x.rootdir, x.subdir, x.rootdir, x.subdir, x.id)
 
-            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+            img = cv.imread(path, cv.IMREAD_GRAYSCALE)
 
-            ret, img = cv2.threshold(img, 180, 255, cv2.THRESH_BINARY_INV)
+            ret, img = cv.threshold(img, 180, 255, cv.THRESH_BINARY_INV)
 
-            img = cv2.ximgproc.thinning(img, img, 1)
+            img = cv.ximgproc.thinning(img, img, cv.ximgproc.THINNING_GUOHALL)
 
             kernel = np.ones((5, 5), np.uint8)
 
-            img = cv2.dilate(img, kernel)
+            img = cv.dilate(img, kernel)
 
-            img = cv2.resize(img, (0, 0), fx=0.2, fy=0.2)  # reduce image size to only 9.5%
+            img = cv.resize(img, (0, 0), fx=0.095, fy=0.095)  # reduce image size to only 9.5%
 
             h, w = img.shape[0:2]
             heights.append(h)
@@ -70,23 +70,23 @@ class dataClass():
         for x in tqdm(self.training_data):
 
             if x[0].shape[0] % 2 == 0 and x[0].shape[1] % 2 == 0:
-                x[0] = cv2.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2),
+                x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2),
                                           int((max_height - x[0].shape[0]) / 2), int((max_width - x[0].shape[1]) / 2),
-                                          int((max_width - x[0].shape[1]) / 2), cv2.BORDER_CONSTANT, value=0)
+                                          int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
             elif x[0].shape[0] % 2 != 0 and x[0].shape[1] % 2 == 0:
-                x[0] = cv2.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2) + 1,
+                x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2) + 1,
                                           int((max_height - x[0].shape[0]) / 2), int((max_width - x[0].shape[1]) / 2),
-                                          int((max_width - x[0].shape[1]) / 2), cv2.BORDER_CONSTANT, value=0)
+                                          int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
             if x[0].shape[0] % 2 == 0 and x[0].shape[1] % 2 != 0:
-                x[0] = cv2.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2),
+                x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2),
                                           int((max_height - x[0].shape[0]) / 2),
                                           int((max_width - x[0].shape[1]) / 2) + 1,
-                                          int((max_width - x[0].shape[1]) / 2), cv2.BORDER_CONSTANT, value=0)
+                                          int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
             if x[0].shape[0] % 2 != 0 and x[0].shape[1] % 2 != 0:
-                x[0] = cv2.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2) + 1,
+                x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2) + 1,
                                           int((max_height - x[0].shape[0]) / 2),
                                           int((max_width - x[0].shape[1]) / 2) + 1,
-                                          int((max_width - x[0].shape[1]) / 2), cv2.BORDER_CONSTANT, value=0)
+                                          int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
 
         tqdm(np.random.shuffle(self.training_data))
         tqdm(np.save("training_data.npy", self.training_data))
@@ -132,5 +132,5 @@ if __name__ == '__main__':
 
     training_data = np.load("training_data.npy", allow_pickle=True)
     print((training_data[0, 1]).transcript)
-    cv2.imshow('image', training_data[0, 0])
-    cv2.waitKey(0)
+    cv.imshow('image', training_data[0, 0])
+    cv.waitKey(0)
