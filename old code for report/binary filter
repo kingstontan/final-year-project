@@ -25,3 +25,7 @@
             # cv2.imshow('b183', b183)
             # cv2.imshow('b185', b185)
             # cv2.imshow('b187', b187)
+
+
+# for x in onehot:
+#     print(int_to_char[argmax(x)])

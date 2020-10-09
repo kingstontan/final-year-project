@@ -30,28 +30,21 @@ class dataClass():
         data = line
         # define universe of possible input values
         alphabet = """|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,/?:;'"-!#&*()+"""
-        alphabet = alphabet + " "
         # define a mapping of chars to integers
         char_to_int = dict((c, i) for i, c in enumerate(alphabet))
         int_to_char = dict((i, c) for i, c in enumerate(alphabet))
         # integer encode input data
         integer_encoded = [char_to_int[char] for char in data]
-        print(integer_encoded)
         # one hot encode
-        onehot = list()
+        one_hot = []
         for value in integer_encoded:
             letter = [0 for _ in range(len(alphabet))]
             letter[value] = 1
-            onehot.append(letter)
+            one_hot.append(letter)
 
-        # for x in onehot:
-        #     print(int_to_char[argmax(x)])
-
-        return onehot
+        return one_hot
 
     def read_file(self):
-        label_file = open("data/labels.txt","w")
-
         with open("data/lines.txt") as f:
             raw = f.readlines()
 
@@ -64,8 +57,6 @@ class dataClass():
             transcript = ''.join(map(str, x[8:])) #screw the space
             labels.append(lineLabel(x[0], transcript))
 
-
-
     def make_training_data(self):
 
         widths = []
@@ -75,7 +66,7 @@ class dataClass():
 
         for x in tqdm(labels):
             count += 1
-            if count == 10:
+            if count == 5:
                 break
             path = "data/line_images/%s/%s-%s/%s-%s-%s.png" % (
                 x.rootdir, x.rootdir, x.subdir, x.rootdir, x.subdir, x.id)
@@ -96,7 +87,10 @@ class dataClass():
             heights.append(h)
             widths.append(w)
 
-            self.training_data.append([np.array(img), self.one_hot_encode(x.transcript)])
+            one_hot_labels = np.asarray(self.one_hot_encode(x.transcript))
+            one_hot_labels = np.pad(one_hot_labels, [(0,50-one_hot_labels.shape[0]),(0,0)], mode='constant')
+
+            self.training_data.append([np.array(img), one_hot_labels])
 
         max_height = 32
         max_width = 256
@@ -126,13 +120,10 @@ class dataClass():
         tqdm(np.save("training_data.npy", self.training_data))
 
 
-
-
-
 class ConvNetToBiLSTM(nn.Module):
     def __init__(self):
         super(ConvNetToBiLSTM, self).__init__()
-        # 36 by 240
+        # 36 by 256
         self.layer1 = nn.Sequential(
             nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1),
             nn.ReLU(),
@@ -174,14 +165,48 @@ if __name__ == '__main__':
         data.make_training_data()
 
     training_data = np.load("training_data.npy", allow_pickle=True)
-    # print((training_data[0, 1]).transcript)
-    # cv.imshow('image', training_data[0, 0])
-    # cv.waitKey(0)
 
     model = ConvNetToBiLSTM()
 
     loss_function = nn.CTCLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+
+    data_img = torch.Tensor([i[0] for i in training_data])
+
+    data_img = data_img/255
+
+    data_label = torch.Tensor([i[1] for i in training_data])
+
+    val_percentage = 0.1
+
+    val_size = int(len(data_img)*val_percentage)
+
+    train_X = data_img[:-val_size]
+    train_y = data_label[:-val_size]
+
+    test_X = data_img[-val_size:]
+    test_y = data_label[-val_size:]
+
+    BATCH_SIZE = 100
+    EPOCHS = 2
+
+    for epoch in range(EPOCHS):
+        for i in tqdm(range(0, len(train_X),BATCH_SIZE)):  # from 0, to the len of x, stepping BATCH_SIZE at a time. [:50] ..for now just to dev
+            print(f"{i}:{i+BATCH_SIZE}")
+            batch_X = train_X[i:i + BATCH_SIZE].view(-1, 1, 50, 50)
+            batch_y = train_y[i:i + BATCH_SIZE]
+
+            model.zero_grad()
+
+            outputs = model(batch_X)
+            loss = loss_function(outputs, batch_y)
+            loss.backward()
+            optimizer.step()  # Does the update
+
+        # print(f"Epoch: {epoch}. Loss: {loss}")
+
+
+
 
 
 
