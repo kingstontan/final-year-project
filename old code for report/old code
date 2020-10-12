@@ -1,0 +1,230 @@
+# self.training_data = []
+        # self.read_file()
+        # self.make_training_data()
+        # self.training_data = np.array(self.training_data)
+        # self.x_data = torch.from_numpy(self.training_data[0,:])
+        # self.y_data = torch.from_numpy(self.training_data[1,:])
+        # self.length = 3
+
+
+
+ # def make_training_data(self):
+    #
+    #     # widths = []
+    #     # heights = []
+    #
+    #     count = 0
+    #
+    #     for x in tqdm(labels):
+    #         count += 1
+    #         if count == 30:
+    #             break
+    #         path = "data/line_images/%s/%s-%s/%s-%s-%s.png" % (
+    #             x.rootdir, x.rootdir, x.subdir, x.rootdir, x.subdir, x.id)
+    #
+    #         # img = Image.open(path).convert('L')
+    #
+    #         img = cv.imread(path, cv.IMREAD_GRAYSCALE)
+    #
+    #         ret, img = cv.threshold(img, 185, 255, cv.THRESH_BINARY_INV)
+    #
+    #         img = cv.ximgproc.thinning(img, img, cv.ximgproc.THINNING_GUOHALL)
+    #
+    #         kernel = np.ones((5, 5), np.uint8)
+    #
+    #         img = cv.dilate(img, kernel)
+    #
+    #         img = cv.resize(img, (0, 0), fx=0.095, fy=0.095)  # reduce image size to only 9.5%
+    #
+    #         # h, w = img.shape[0:2]
+    #         # heights.append(h)
+    #         # widths.append(w)
+    #
+    #         one_hot_labels = np.asarray(one_hot_encode(x.transcript))
+    #         one_hot_labels = np.pad(one_hot_labels, [(0, 70 - one_hot_labels.shape[0]), (0, 0)], mode='constant')
+    #
+    #         # self.x_data.append(img)
+    #         # self.y_data.append(one_hot_labels)
+    #
+    #         self.training_data.append([img, one_hot_labels])
+    #
+    #     max_height = 32
+    #     max_width = 256
+    #
+    #     for x in tqdm(self.training_data):
+    #
+    #         if x[0].shape[0] % 2 == 0 and x[0].shape[1] % 2 == 0:
+    #             x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2),
+    #                                      int((max_height - x[0].shape[0]) / 2), int((max_width - x[0].shape[1]) / 2),
+    #                                      int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
+    #         elif x[0].shape[0] % 2 != 0 and x[0].shape[1] % 2 == 0:
+    #             x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2) + 1,
+    #                                      int((max_height - x[0].shape[0]) / 2), int((max_width - x[0].shape[1]) / 2),
+    #                                      int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
+    #         if x[0].shape[0] % 2 == 0 and x[0].shape[1] % 2 != 0:
+    #             x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2),
+    #                                      int((max_height - x[0].shape[0]) / 2),
+    #                                      int((max_width - x[0].shape[1]) / 2) + 1,
+    #                                      int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
+    #         if x[0].shape[0] % 2 != 0 and x[0].shape[1] % 2 != 0:
+    #             x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2) + 1,
+    #                                      int((max_height - x[0].shape[0]) / 2),
+    #                                      int((max_width - x[0].shape[1]) / 2) + 1,
+    #                                      int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
+    #
+    #         x[0] = Image.fromarray(x[0]).convert('L')
+    #
+    #     tqdm(np.save("training_data.npy", self.training_data))
+
+
+# class CleanDataset(Dataset):
+#     def __init__(self, data):
+#         self.data = data.astype(np.float64)
+#         self.x = torch.from_numpy(data[:, 0])
+#         self.y = torch.from_numpy(data[:[1]])
+#         self.length = data.shape[0]
+#
+#     # support indexing such that dataset[i] can be used to get i-th sample
+#     def __getitem__(self, index):
+#         return self.x[index], self.y[index]
+#
+#     # we can call len(dataset) to return the size
+#     def __len__(self):
+#         return self.length
+
+
+# class RawData:
+#     training_data = []
+#
+#     def one_hot_encode(self, line):
+#         # define input string
+#         data = line
+#         # define universe of possible input values
+#         alphabet = """|ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,/?:;'"-!#&*()+"""
+#         # define a mapping of chars to integers
+#         char_to_int = dict((c, i) for i, c in enumerate(alphabet))
+#         int_to_char = dict((i, c) for i, c in enumerate(alphabet))
+#         # integer encode input data
+#         integer_encoded = [char_to_int[char] for char in data]
+#         # one hot encode
+#         one_hot = []
+#         for value in integer_encoded:
+#             letter = [0 for _ in range(len(alphabet))]
+#             letter[value] = 1
+#             one_hot.append(letter)
+#
+#         return one_hot
+#
+#     def read_file(self):
+#         with open("data/lines.txt") as f:
+#             raw = f.readlines()
+#
+#         lines = []
+#
+#         for x in raw:
+#             lines.append(x.split())
+#
+#         for x in lines:
+#             transcript = ''.join(map(str, x[8:]))  # screw the space
+#             labels.append(lineLabel(x[0], transcript))
+#
+#     def make_training_data(self):
+#
+#         widths = []
+#         heights = []
+#
+#         count = 0
+#
+#         for x in tqdm(labels):
+#             count += 1
+#             if count == 30:
+#                 break
+#             path = "data/line_images/%s/%s-%s/%s-%s-%s.png" % (
+#                 x.rootdir, x.rootdir, x.subdir, x.rootdir, x.subdir, x.id)
+#
+#             img = cv.imread(path, cv.IMREAD_GRAYSCALE)
+#
+#             ret, img = cv.threshold(img, 185, 255, cv.THRESH_BINARY_INV)
+#
+#             img = cv.ximgproc.thinning(img, img, cv.ximgproc.THINNING_GUOHALL)
+#
+#             kernel = np.ones((5, 5), np.uint8)
+#
+#             img = cv.dilate(img, kernel)
+#
+#             img = cv.resize(img, (0, 0), fx=0.095, fy=0.095)  # reduce image size to only 9.5%
+#
+#             h, w = img.shape[0:2]
+#             heights.append(h)
+#             widths.append(w)
+#
+#             one_hot_labels = np.asarray(self.one_hot_encode(x.transcript))
+#             one_hot_labels = np.pad(one_hot_labels, [(0, 70 - one_hot_labels.shape[0]), (0, 0)], mode='constant')
+#
+#             self.training_data.append([np.array(img), one_hot_labels])
+#
+#         max_height = 32
+#         max_width = 256
+#
+#         for x in tqdm(self.training_data):
+#
+#             if x[0].shape[0] % 2 == 0 and x[0].shape[1] % 2 == 0:
+#                 x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2),
+#                                          int((max_height - x[0].shape[0]) / 2), int((max_width - x[0].shape[1]) / 2),
+#                                          int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
+#             elif x[0].shape[0] % 2 != 0 and x[0].shape[1] % 2 == 0:
+#                 x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2) + 1,
+#                                          int((max_height - x[0].shape[0]) / 2), int((max_width - x[0].shape[1]) / 2),
+#                                          int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
+#             if x[0].shape[0] % 2 == 0 and x[0].shape[1] % 2 != 0:
+#                 x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2),
+#                                          int((max_height - x[0].shape[0]) / 2),
+#                                          int((max_width - x[0].shape[1]) / 2) + 1,
+#                                          int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
+#             if x[0].shape[0] % 2 != 0 and x[0].shape[1] % 2 != 0:
+#                 x[0] = cv.copyMakeBorder(x[0], int((max_height - x[0].shape[0]) / 2) + 1,
+#                                          int((max_height - x[0].shape[0]) / 2),
+#                                          int((max_width - x[0].shape[1]) / 2) + 1,
+#                                          int((max_width - x[0].shape[1]) / 2), cv.BORDER_CONSTANT, value=0)
+#
+#         tqdm(np.save("training_data.npy", self.training_data))
+
+
+# training_data = np.load("training_data.npy", allow_pickle=True)
+
+    # dataset = CleanDataset(training_data)
+
+    # dataiter = iter(train_loader)
+    # data = dataiter.next()
+    # features, labels = data
+    # print(features, labels)
+
+
+
+    # labels = []
+
+
+# class lineLabel():
+#     def __init__(self, lineid, transcript):
+#         lineid = lineid.split('-')
+#         self.rootdir = lineid[0]
+#         self.subdir = lineid[1]
+#         self.id = lineid[2]
+#         self.transcript = transcript
+
+
+
+# for i in tqdm(range(0, len(train_X),
+    #                     BATCH_SIZE)):  # from 0, to the len of x, stepping BATCH_SIZE at a time. [:50] ..for now just to dev
+    #     print(f"{i}:{i + BATCH_SIZE}")
+    #     batch_X = train_X[i:i + BATCH_SIZE].view(-1, 1, 32, 256)
+    #     batch_y = train_y[i:i + BATCH_SIZE]
+    #
+    #     model.zero_grad()
+    #
+    #     outputs = model(batch_X)
+    #     loss = loss_function(outputs, batch_y)
+    #     loss.backward()
+    #     optimizer.step()  # Does the update
+    #
+    # # print(f"Epoch: {epoch}. Loss: {loss}")

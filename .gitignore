@@ -1,5 +1,6 @@
 #images
 data/line_images/
+data/line_img/
 training_data.npy
 
 # Byte-compiled / optimized / DLL files
